@@ -117,7 +117,7 @@ public class UserSession {
     try {
       log.debug("Sending message from user with session Id '{}': {}", session.getId(), message);
       session.sendMessage(new TextMessage(message.toString()));
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.error("Exception sending message", e);
     }
   }
