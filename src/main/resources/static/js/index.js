@@ -33,7 +33,7 @@ ws.onmessage = function(message) {
 		startResponse(parsedMessage);
 		break;
 	case 'error':
-		if (state == I_AM_STARTING) {
+		if (state === I_AM_STARTING) {
 			setState(I_CAN_START);
 		}
 		onError('Error message from server: ' + parsedMessage.message);
@@ -56,10 +56,8 @@ ws.onmessage = function(message) {
 	case 'position':
 		document.getElementById("videoPosition").value = parsedMessage.position;
 		break;
-	case 'iceCandidate':
-		break;
 	default:
-		if (state == I_AM_STARTING) {
+		if (state === I_AM_STARTING) {
 			setState(I_CAN_START);
 		}
 		onError('Unrecognized message', parsedMessage);
@@ -130,13 +128,23 @@ function onIceCandidate(candidate) {
 }
 
 function startResponse(message) {
-	setState(I_CAN_STOP);
-	console.log('SDP answer received from server. Processing ...');
-
-	webRtcPeer.processAnswer(message.sdpAnswer, function(error) {
-		if (error)
-			return console.error(error);
-	});
+	if (message.response !== 'accepted') {
+		var errorMsg = message.message ? message.message : 'Unknow error';
+		console.info('Call not accepted for the following reason: ' + errorMsg);
+		setState(I_CAN_START);
+		if (webRtcPeer) {
+			webRtcPeer.dispose();
+			webRtcPeer = null;
+		}
+		hideSpinner(video);
+	} else {
+		setState(I_CAN_STOP);
+		console.log('SDP answer received from server. Processing ...');
+		webRtcPeer.processAnswer(message.sdpAnswer, function(error) {
+			if (error)
+				return console.error(error);
+		});
+	}
 }
 
 function pause() {
@@ -181,6 +189,10 @@ function debugDot() {
 
 function playEnd() {
 	setState(I_CAN_START);
+	if (webRtcPeer) {
+		webRtcPeer.dispose();
+		webRtcPeer = null;
+	}
 	hideSpinner(video);
 }
 

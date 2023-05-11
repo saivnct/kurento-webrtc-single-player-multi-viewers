@@ -37,7 +37,7 @@
 </header>
 <div class="container">
 	<div class="page-header">
-		<h1>Giangbb Studio: Play of a video through WebRTC - VIEWER</h1>
+		<h1>Play of a video through WebRTC - VIEWER</h1>
 		<p>
 			This is
 			an implementation of a video broadcasting application. There are two
@@ -66,15 +66,25 @@
 		<div class="col-md-5">
 			<div class="row">
 				<div class="col-md-12">
-					<a id="presenter" href="#" class="btn btn-success"><span
-							class="glyphicon glyphicon-play"></span> Presenter </a> <a
-						id="viewer" href="#" class="btn btn-primary"><span
-						class="glyphicon glyphicon-user"></span> Viewer</a> <a id="stop"
-																			   href="#" class="btn btn-danger"><span
-						class="glyphicon glyphicon-stop"></span> Stop</a>
+					<a id="viewer" href="#" class="btn btn-primary"><span class="glyphicon glyphicon-user"></span> Viewer</a>
+					<a id="stop" href="#" class="btn btn-danger"><span class="glyphicon glyphicon-stop"></span> Stop</a>
 				</div>
 			</div>
-			<br /> <label class="control-label" for="console">Console</label><br>
+
+			<br>
+
+			<div class="row">
+				<div class="col-md-12">
+					<input type="text"
+						   id="videourl"
+						   value="https://raw.githubusercontent.com/Kurento/test-files/main/video/format/sintel.webm"
+						   style="width: 100%">
+				</div>
+			</div>
+
+			<br>
+			<label class="control-label" for="console">Console</label>
+			<br>
 			<br>
 			<div id="console" class="democonsole">
 				<ul></ul>

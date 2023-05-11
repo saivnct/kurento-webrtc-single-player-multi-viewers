@@ -47,10 +47,14 @@ public class PlayerApp implements WebSocketConfigurer {
   }
 
 
-
   @Bean
   public KurentoClient kurentoClient() {
     return KurentoClient.create();
+  }
+
+  @Bean
+  public UserRepo userRepo() {
+    return new UserRepo();
   }
 
   @Bean

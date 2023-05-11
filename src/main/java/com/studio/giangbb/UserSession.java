@@ -17,10 +17,17 @@
 
 package com.studio.giangbb;
 
+import com.google.gson.JsonObject;
 import org.kurento.client.IceCandidate;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.WebRtcEndpoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.io.IOException;
 
 /**
  * Protocol handler for video player through WebRTC.
@@ -29,12 +36,42 @@ import org.kurento.client.WebRtcEndpoint;
  *
  */
 public class UserSession {
+  private static final Logger log = LoggerFactory.getLogger(UserSession.class);
 
+  public enum Role {
+    PRESENTER,
+    VIEWER,
+  }
+
+  private final Role role;
+  private final WebSocketSession session;
+
+  private final String videoUrl;
   private WebRtcEndpoint webRtcEndpoint;
+
+
+
+  //region only presenter
   private MediaPipeline mediaPipeline;
   private PlayerEndpoint playerEndpoint;
+  //endregion
 
-  public UserSession() {
+  public UserSession(WebSocketSession session, Role role, String videoUrl) {
+    this.videoUrl = videoUrl;
+    this.role = role;
+    this.session = session;
+  }
+
+  public Role getRole() {
+    return role;
+  }
+
+  public WebSocketSession getSession() {
+    return session;
+  }
+
+  public String getVideoUrl() {
+    return videoUrl;
   }
 
   public WebRtcEndpoint getWebRtcEndpoint() {
@@ -65,8 +102,23 @@ public class UserSession {
     this.playerEndpoint = playerEndpoint;
   }
 
+  public void connectToPlayerEndpoint(WebRtcEndpoint webRtcEndpoint) {
+    this.playerEndpoint.connect(webRtcEndpoint);
+  }
+
   public void release() {
     this.playerEndpoint.stop();
     this.mediaPipeline.release();
+    this.webRtcEndpoint.release();
+  }
+
+
+  public void sendMessage(JsonObject message) {
+    try {
+      log.debug("Sending message from user with session Id '{}': {}", session.getId(), message);
+      session.sendMessage(new TextMessage(message.toString()));
+    } catch (IOException e) {
+      log.error("Exception sending message", e);
+    }
   }
 }
