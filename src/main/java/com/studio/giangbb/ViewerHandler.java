@@ -99,7 +99,7 @@ public class ViewerHandler extends TextWebSocketHandler {
 
   private synchronized void viewer(final WebSocketSession session, JsonObject jsonMessage)
           throws IOException {
-    if (!jsonMessage.has("videourl")){
+    if (!jsonMessage.has("videourl") || StringUtils.isEmpty(jsonMessage.get("videourl").getAsString())){
       JsonObject response = new JsonObject();
       response.addProperty("id", "viewerResponse");
       response.addProperty("response", "rejected");

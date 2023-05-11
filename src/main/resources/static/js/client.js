@@ -4,9 +4,9 @@
  *
  */
 
-var ws = new WebSocket('wss://' + location.host + '/viewer');
-var video;
-var webRtcPeer;
+let ws = new WebSocket('wss://' + location.host + '/viewer');
+let video;
+let webRtcPeer;
 
 window.onload = function() {
 	console = new Console();
@@ -19,7 +19,7 @@ window.onbeforeunload = function() {
 }
 
 ws.onmessage = function(message) {
-	var parsedMessage = JSON.parse(message.data);
+	const parsedMessage = JSON.parse(message.data);
 	console.info('Received message: ' + message.data);
 
 	switch (parsedMessage.id) {
@@ -42,8 +42,8 @@ ws.onmessage = function(message) {
 
 function viewerResponse(message) {
 	if (message.response !== 'accepted') {
-		var errorMsg = message.message ? message.message : 'Unknow error';
-		console.info('Call not accepted for the following reason: ' + errorMsg);
+		const errorMsg = message.message ? message.message : 'Unknow error';
+		console.error('Call not accepted for the following reason: ' + errorMsg);
 		dispose();
 	} else {
 		webRtcPeer.processAnswer(message.sdpAnswer, function(error) {
@@ -57,17 +57,34 @@ function viewer() {
 	if (!webRtcPeer) {
 		showSpinner(video);
 
-		var options = {
+		const mode = $('input[name="mode"]:checked').val();
+		console.log('Creating WebRtcPeer in ' + mode + ' mode and generating local sdp offer ...');
+
+		// Video and audio by default
+		const userMediaConstraints = {
+			audio : true,
+			video : true
+		}
+
+		if (mode === 'video-only') {
+			userMediaConstraints.audio = false;
+		} else if (mode === 'audio-only') {
+			userMediaConstraints.video = false;
+		}
+
+		const options = {
 			remoteVideo : video,
+			mediaConstraints : userMediaConstraints,
 			onicecandidate : onIceCandidate
 		}
-		webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
-				function(error) {
-					if (error) {
-						return console.error(error);
-					}
-					this.generateOffer(onOfferViewer);
-				});
+
+		console.info('User media constraints' + userMediaConstraints);
+
+		webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options, function(error) {
+			if (error)
+				return console.error(error);
+			this.generateOffer(onOfferViewer);
+		});
 
 		enableStopButton();
 	}
@@ -91,7 +108,7 @@ function onOfferViewer(error, offerSdp) {
 function onIceCandidate(candidate) {
 	console.log("Local candidate" + JSON.stringify(candidate));
 
-	var message = {
+	const message = {
 		id : 'onIceCandidate',
 		candidate : candidate
 	};
@@ -99,7 +116,7 @@ function onIceCandidate(candidate) {
 }
 
 function stop() {
-	var message = {
+	const message = {
 		id : 'stop'
 	}
 	sendMessage(message);
@@ -118,11 +135,13 @@ function dispose() {
 
 function disableStopButton() {
 	enableButton('#viewer', 'viewer()');
+	enableButton("[name='mode']");
 	disableButton('#stop');
 }
 
 function enableStopButton() {
 	disableButton('#viewer');
+	disableButton("[name='mode']");
 	enableButton('#stop', 'stop()');
 }
 
@@ -133,24 +152,26 @@ function disableButton(id) {
 
 function enableButton(id, functionName) {
 	$(id).attr('disabled', false);
-	$(id).attr('onclick', functionName);
+	if (functionName) {
+		$(id).attr('onclick', functionName);
+	}
 }
 
 function sendMessage(message) {
-	var jsonMessage = JSON.stringify(message);
+	const jsonMessage = JSON.stringify(message);
 	console.log('Sending message: ' + jsonMessage);
 	ws.send(jsonMessage);
 }
 
 function showSpinner() {
-	for (var i = 0; i < arguments.length; i++) {
+	for (let i = 0; i < arguments.length; i++) {
 		arguments[i].poster = './img/transparent-1px.png';
 		arguments[i].style.background = 'center transparent url("./img/spinner.gif") no-repeat';
 	}
 }
 
 function hideSpinner() {
-	for (var i = 0; i < arguments.length; i++) {
+	for (let i = 0; i < arguments.length; i++) {
 		arguments[i].src = '';
 		arguments[i].poster = './img/webrtc.png';
 		arguments[i].style.background = '';

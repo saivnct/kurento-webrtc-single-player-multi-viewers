@@ -20,6 +20,7 @@ package com.studio.giangbb;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.kurento.client.*;
 import org.kurento.commons.exception.KurentoException;
 import org.kurento.jsonrpc.JsonUtils;
@@ -95,9 +96,9 @@ public class PlayerHandler extends TextWebSocketHandler {
   }
 
   private void start(final WebSocketSession session, JsonObject jsonMessage) throws IOException{
-    if (!jsonMessage.has("videourl")){
+    if (!jsonMessage.has("videourl") || StringUtils.isEmpty(jsonMessage.get("videourl").getAsString())){
       JsonObject response = new JsonObject();
-      response.addProperty("id", "viewerResponse");
+      response.addProperty("id", "startResponse");
       response.addProperty("response", "rejected");
       response.addProperty("message", "No videourl ...");
       session.sendMessage(new TextMessage(response.toString()));

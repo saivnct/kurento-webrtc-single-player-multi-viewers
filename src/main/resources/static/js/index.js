@@ -4,15 +4,15 @@
  *
  */
 
-var ws = new WebSocket('wss://' + location.host + '/player');
-var video;
-var webRtcPeer;
-var state = null;
-var isSeekable = false;
+let ws = new WebSocket('wss://' + location.host + '/player');
+let video;
+let webRtcPeer;
+let state = null;
+let isSeekable = false;
 
-var I_CAN_START = 0;
-var I_CAN_STOP = 1;
-var I_AM_STARTING = 2;
+let I_CAN_START = 0;
+let I_CAN_STOP = 1;
+let I_AM_STARTING = 2;
 
 window.onload = function() {
 	console = new Console();
@@ -25,7 +25,7 @@ window.onbeforeunload = function() {
 }
 
 ws.onmessage = function(message) {
-	var parsedMessage = JSON.parse(message.data);
+	const parsedMessage = JSON.parse(message.data);
 	console.info('Received message: ' + message.data);
 
 	switch (parsedMessage.id) {
@@ -69,22 +69,22 @@ function start() {
 	setState(I_AM_STARTING);
 	showSpinner(video);
 
-	var mode = $('input[name="mode"]:checked').val();
+	const mode = $('input[name="mode"]:checked').val();
 	console.log('Creating WebRtcPeer in ' + mode + ' mode and generating local sdp offer ...');
 
 	// Video and audio by default
-	var userMediaConstraints = {
+	const userMediaConstraints = {
 		audio : true,
 		video : true
 	}
 
-	if (mode == 'video-only') {
+	if (mode === 'video-only') {
 		userMediaConstraints.audio = false;
-	} else if (mode == 'audio-only') {
+	} else if (mode === 'audio-only') {
 		userMediaConstraints.video = false;
 	}
 
-	var options = {
+	const options = {
 		remoteVideo : video,
 		mediaConstraints : userMediaConstraints,
 		onicecandidate : onIceCandidate
@@ -92,20 +92,20 @@ function start() {
 
 	console.info('User media constraints' + userMediaConstraints);
 
-	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
-			function(error) {
-				if (error)
-					return console.error(error);
-				webRtcPeer.generateOffer(onOffer);
-			});
+	webRtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options, function(error) {
+		if (error)
+			return console.error(error);
+		webRtcPeer.generateOffer(onOfferPresenter);
+	});
 }
 
-function onOffer(error, offerSdp) {
+function onOfferPresenter(error, offerSdp) {
 	if (error)
 		return console.error('Error generating the offer');
+
 	console.info('Invoking SDP offer callback function ' + location.host);
 
-	var message = {
+	const message = {
 		id : 'start',
 		sdpOffer : offerSdp,
 		videourl : document.getElementById('videourl').value
@@ -120,7 +120,7 @@ function onError(error) {
 function onIceCandidate(candidate) {
 	console.log('Local candidate' + JSON.stringify(candidate));
 
-	var message = {
+	const message = {
 		id : 'onIceCandidate',
 		candidate : candidate
 	}
@@ -129,8 +129,8 @@ function onIceCandidate(candidate) {
 
 function startResponse(message) {
 	if (message.response !== 'accepted') {
-		var errorMsg = message.message ? message.message : 'Unknow error';
-		console.info('Call not accepted for the following reason: ' + errorMsg);
+		const errorMsg = message.message ? message.message : 'Unknow error';
+		console.error('Call not accepted for the following reason: ' + errorMsg);
 		setState(I_CAN_START);
 		if (webRtcPeer) {
 			webRtcPeer.dispose();
@@ -150,7 +150,7 @@ function startResponse(message) {
 function pause() {
 	togglePause()
 	console.log('Pausing video ...');
-	var message = {
+	const message = {
 		id : 'pause'
 	}
 	sendMessage(message);
@@ -159,7 +159,7 @@ function pause() {
 function resume() {
 	togglePause()
 	console.log('Resuming video ...');
-	var message = {
+	const message = {
 		id : 'resume'
 	}
 	sendMessage(message);
@@ -172,7 +172,7 @@ function stop() {
 		webRtcPeer.dispose();
 		webRtcPeer = null;
 
-		var message = {
+		const message = {
 			id : 'stop'
 		}
 		sendMessage(message);
@@ -197,7 +197,7 @@ function playEnd() {
 }
 
 function doSeek() {
-	var message = {
+	const message = {
 		id : 'doSeek',
 		position: document.getElementById("seekPosition").value
 	}
@@ -205,7 +205,7 @@ function doSeek() {
 }
 
 function getPosition() {
-	var message = {
+	const message = {
 		id : 'getPosition'
 	}
 	sendMessage(message);
@@ -269,14 +269,14 @@ function setState(nextState) {
 }
 
 function sendMessage(message) {
-	var jsonMessage = JSON.stringify(message);
+	const jsonMessage = JSON.stringify(message);
 	console.log('Sending message: ' + jsonMessage);
 	ws.send(jsonMessage);
 }
 
 function togglePause() {
-	var pauseText = $("#pause-text").text();
-	if (pauseText == " Resume ") {
+	const pauseText = $("#pause-text").text();
+	if (pauseText === " Resume ") {
 		$("#pause-text").text(" Pause ");
 		$("#pause-icon").attr('class', 'glyphicon glyphicon-pause');
 		$("#pause").attr('onclick', "pause()");
@@ -300,14 +300,14 @@ function enableButton(id, functionName) {
 }
 
 function showSpinner() {
-	for (var i = 0; i < arguments.length; i++) {
+	for (let i = 0; i < arguments.length; i++) {
 		arguments[i].poster = './img/transparent-1px.png';
 		arguments[i].style.background = "center transparent url('./img/spinner.gif') no-repeat";
 	}
 }
 
 function hideSpinner() {
-	for (var i = 0; i < arguments.length; i++) {
+	for (let i = 0; i < arguments.length; i++) {
 		arguments[i].src = '';
 		arguments[i].poster = './img/webrtc.png';
 		arguments[i].style.background = '';
