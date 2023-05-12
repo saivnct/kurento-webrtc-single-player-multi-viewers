@@ -107,9 +107,26 @@ public class UserSession {
   }
 
   public void release() {
-    this.playerEndpoint.stop();
-    this.mediaPipeline.release();
-    this.webRtcEndpoint.release();
+    try{
+      this.playerEndpoint.stop();
+    }catch (Exception e){
+      log.error(e.getMessage());
+    }
+
+    try{
+      this.mediaPipeline.release();
+    }catch (Exception e){
+      log.error(e.getMessage());
+    }
+
+    try{
+      this.webRtcEndpoint.release();
+    }catch (Exception e){
+      log.error(e.getMessage());
+    }
+
+
+
   }
 
 
